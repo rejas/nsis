@@ -2,7 +2,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Slic3rPE"
-!define PRODUCT_VERSION "v1.40.1-rc"
+!define PRODUCT_VERSION "v1.40.1"
 !define PRODUCT_PUBLISHER "Prusa3D"
 !define PRODUCT_WEB_SITE "https://github.com/prusa3d/Slic3r"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\slic3r.exe"
@@ -63,7 +63,7 @@ Section "Main program" SEC01
   SetOverwrite ifnewer
   SectionIn 1 2   RO
 
-  File /r ".\Slic3rPE-1.40.1-rc\"
+  File /r ".\Slic3rPE-1.40.1\"
 
   ; Shortcuts
   SetShellVarContext all
