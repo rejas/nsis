@@ -2,14 +2,15 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "StaxRip"
-!define PRODUCT_VERSION "v1.0.0.1"
-!define PRODUCT_WEB_SITE "http://www.planetdvb.net/staxrip"
-!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\StaxRip.exe"
+!define PRODUCT_VERSION "v1.7.0.0"
+!define PRODUCT_PUBLISHER "stax76"
+!define PRODUCT_WEB_SITE "http://staxrip.readthedocs.io/#"
+!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\staxrip.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define PRODUCT_STARTMENU_REGVAL "NSIS:StartMenuDir"
 
-SetCompressor lzma
+SetCompressor /SOLID lzma
 
 ; MUI 1.67 compatible ------
 !include "MUI.nsh"
@@ -21,12 +22,14 @@ SetCompressor lzma
 
 ; Welcome page
 !insertmacro MUI_PAGE_WELCOME
+; Components page
+!insertmacro MUI_PAGE_COMPONENTS
 ; Directory page
 !insertmacro MUI_PAGE_DIRECTORY
 ; Start menu page
 var ICONS_GROUP
 !define MUI_STARTMENUPAGE_NODISABLE
-!define MUI_STARTMENUPAGE_DEFAULTFOLDER "StaxRip"
+!define MUI_STARTMENUPAGE_DEFAULTFOLDER "${PRODUCT_NAME}"
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT "${PRODUCT_UNINST_ROOT_KEY}"
 !define MUI_STARTMENUPAGE_REGISTRY_KEY "${PRODUCT_UNINST_KEY}"
 !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "${PRODUCT_STARTMENU_REGVAL}"
@@ -34,8 +37,7 @@ var ICONS_GROUP
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page
-!define MUI_FINISHPAGE_RUN "$INSTDIR\StaxRip.exe"
-!define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\Documents\help.htm"
+!define MUI_FINISHPAGE_RUN "$INSTDIR\staxrip.exe"
 !insertmacro MUI_PAGE_FINISH
 
 ; Uninstaller pages
@@ -50,39 +52,21 @@ var ICONS_GROUP
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "StaxRip v1.0.0.1 setup.exe"
-InstallDir "$PROGRAMFILES\StaxRip"
+OutFile "${PRODUCT_NAME} ${PRODUCT_VERSION} setup.exe"
+InstallDir "$PROGRAMFILES\${PRODUCT_NAME}"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
 ShowUnInstDetails show
- 
+
 Section "Main program" SEC01
   SetOutPath "$INSTDIR"
-  SetOverwrite ifnewer            
+  SetOverwrite ifnewer
+  SectionIn 1 2   RO
 
-  File "staxrip\StaxRip.exe"
-  File "staxrip\Stax.dll"
-  File "staxrip\ICSharpCode.SharpZipLibrary.dll"
-  File "staxrip\System Requirements.htm"
-  
-  CreateDirectory $INSTDIR\Documents
-  SetOutPath "$INSTDIR\Documents"
-  File "staxrip\Documents\background.gif"
-  File "staxrip\Documents\changelog.htm"
-  File "staxrip\Documents\dvbguide.htm"
-  File "staxrip\Documents\dvdguide.htm"
-  File "staxrip\Documents\glossary.htm"
-  File "staxrip\Documents\help.htm"
-  File "staxrip\Documents\info.htm"
-  File "staxrip\Documents\license.htm"
-  File "staxrip\Documents\main.gif"
-  File "staxrip\Documents\moreguides.htm"
-  File "staxrip\Documents\projects.htm"
-  File "staxrip\Documents\styles.css"
-  File "staxrip\Documents\vBulletin.txt"
-  
-; Shortcuts
-  SetShellVarContext all  
+  File /r ".\StaxRip-x64-1.7.0.0-stable\"
+
+  ; Shortcuts
+  SetShellVarContext all
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
   CreateDirectory "$SMPROGRAMS\$ICONS_GROUP"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\${PRODUCT_NAME}.lnk" "$INSTDIR\StaxRip.exe"
@@ -107,7 +91,13 @@ Section -Post
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\StaxRip.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "Publisher" "${PRODUCT_PUBLISHER}"
 SectionEnd
+
+; Section descriptions
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+!insertmacro MUI_DESCRIPTION_TEXT ${SEC01} "Main program"
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Function un.onUninstSuccess
   HideWindow
@@ -122,15 +112,12 @@ FunctionEnd
 Section Uninstall
   SetShellVarContext all
   !insertmacro MUI_STARTMENU_GETFOLDER "Application" $ICONS_GROUP
-  
-  Delete "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk"
-  Delete "$SMPROGRAMS\$ICONS_GROUP\Website.lnk"
-  Delete "$SMPROGRAMS\$ICONS_GROUP\${PRODUCT_NAME}.lnk"   
-  Delete "$DESKTOP\${PRODUCT_NAME}.lnk"
-  
-  RMDir "$SMPROGRAMS\$ICONS_GROUP"                          
-  RMDir /r /REBOOTOK "$INSTDIR\Documents"
+
+  ; Remove directories used
+  RMDir "$SMPROGRAMS\$ICONS_GROUP"
   RMDir /r /REBOOTOK "$INSTDIR"
+
+  Delete "$DESKTOP\${PRODUCT_NAME}.lnk"
 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
   DeleteRegKey HKLM "${PRODUCT_DIR_REGKEY}"
